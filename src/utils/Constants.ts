@@ -29,6 +29,6 @@ export default {
     DEFAULT_MODEL: "tiny",
     DEFAULT_SUBTASK: "transcribe",
     DEFAULT_LANGUAGE: "english",
-    DEFAULT_QUANTIZED: isMobileOrTablet,
-    DEFAULT_MULTILINGUAL: false,
+    DEFAULT_QUANTIZED: true,
+    DEFAULT_MULTILINGUAL: true,
 };

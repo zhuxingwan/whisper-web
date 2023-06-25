@@ -16,5 +16,6 @@ function createWorker(messageEventHandler: MessageEventHandler): Worker {
     });
     // Listen for messages from the Web Worker
     worker.addEventListener("message", messageEventHandler);
+
     return worker;
 }

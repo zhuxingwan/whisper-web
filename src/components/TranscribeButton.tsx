@@ -1,3 +1,4 @@
+declare const window: any;
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     isModelLoading: boolean;
     isTranscribing: boolean;
@@ -21,7 +22,7 @@ export function TranscribeButton(props: Props): JSX.Element {
             ) : isTranscribing ? (
                 <Spinner text={"Transcribing..."} />
             ) : (
-                "Transcribe Audio"
+                window.i18n[window.lang]["Transcribe Audio"]
             )}
         </button>
     );

@@ -8,7 +8,7 @@ import Constants from "../utils/Constants";
 import { Transcriber } from "../hooks/useTranscriber";
 import Progress from "./Progress";
 import AudioRecorder from "./AudioRecorder";
-
+declare const window: any;
 function titleCase(str: string) {
     str = str.toLowerCase();
     return (str.match(/\w+.?/g) || [])
@@ -21,7 +21,8 @@ function titleCase(str: string) {
 // List of supported languages:
 // https://help.openai.com/en/articles/7031512-whisper-api-faq
 // https://github.com/openai/whisper/blob/248b6cb124225dd263bb9bd32d060b6517e067f8/whisper/tokenizer.py#L79
-const LANGUAGES = {
+const LANGUAGES = window.i18n[window.lang].languages;
+const LANGUAGES2 = {
     en: "english",
     zh: "chinese",
     de: "german",
@@ -226,6 +227,7 @@ export function AudioManager(props: { transcriber: Transcriber }) {
         }
     };
 
+    window.SP_setAudioFromRecording = setAudioFromRecording;
     // When URL changes, download audio
     useEffect(() => {
         if (audioDownloadUrl) {
@@ -269,6 +271,19 @@ export function AudioManager(props: { transcriber: Transcriber }) {
                             <RecordTile
                                 icon={<MicrophoneIcon />}
                                 text={"Record"}
+                                setAudioData={(e) => {
+                                    props.transcriber.onInputChange();
+                                    setAudioFromRecording(e);
+                                }}
+                            />
+                        </>
+                    )}
+                    {navigator.mediaDevices && (
+                        <>
+                            <VerticalBar />
+                            <SpeakerTile
+                                icon={<SpeakerIcon />}
+                                text={"Live Caption"}
                                 setAudioData={(e) => {
                                     props.transcriber.onInputChange();
                                     setAudioFromRecording(e);
@@ -365,7 +380,7 @@ function SettingsModal(props: {
     onClose: () => void;
     transcriber: Transcriber;
 }) {
-    const names = Object.values(LANGUAGES).map(titleCase);
+    const names = Object.values(LANGUAGES2).map(titleCase);
 
     const models = {
         tiny: [61, 231],
@@ -395,7 +410,10 @@ function SettingsModal(props: {
                                     models[key].length == 2,
                             )
                             .map((key) => (
-                                <option key={key} value={key}>{`whisper-${key}${
+                                <option
+                                    key={key}
+                                    value={key}
+                                >{`speechpen-${key}${
                                     props.transcriber.multilingual ? "" : ".en"
                                 } (${
                                     // @ts-ignore
@@ -406,7 +424,7 @@ function SettingsModal(props: {
                             ))}
                     </select>
                     <div className='flex justify-between items-center mb-3 px-1'>
-                        <div className='flex'>
+                        <div className='hidden'>
                             <input
                                 id='multilingual'
                                 type='checkbox'
@@ -421,7 +439,7 @@ function SettingsModal(props: {
                                 Multilingual
                             </label>
                         </div>
-                        <div className='flex'>
+                        <div className='hidden'>
                             <input
                                 id='quantize'
                                 type='checkbox'
@@ -645,7 +663,40 @@ function RecordTile(props: {
         </>
     );
 }
+function SpeakerTile(props: {
+    icon: JSX.Element;
+    text: string;
+    setAudioData: (data: Blob) => void;
+}) {
+    const [showModal, setShowModal] = useState(false);
 
+    const onClick = () => {
+        alert(1);
+        //setShowModal(true);
+    };
+
+    const onClose = () => {
+        setShowModal(false);
+    };
+
+    const onSubmit = (data: Blob | undefined) => {
+        if (data) {
+            props.setAudioData(data);
+            onClose();
+        }
+    };
+
+    return (
+        <>
+            <Tile icon={props.icon} text={props.text} onClick={onClick} />
+            <RecordModal
+                show={showModal}
+                onSubmit={onSubmit}
+                onClose={onClose}
+            />
+        </>
+    );
+}
 function RecordModal(props: {
     show: boolean;
     onSubmit: (data: Blob | undefined) => void;
@@ -777,6 +828,24 @@ function MicrophoneIcon() {
                 strokeLinecap='round'
                 strokeLinejoin='round'
                 d='M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z'
+            />
+        </svg>
+    );
+}
+
+function SpeakerIcon() {
+    return (
+        <svg
+            xmlns='http://www.w3.org/2000/svg'
+            fill='none'
+            viewBox='0 0 24 24'
+            strokeWidth={1.5}
+            stroke='currentColor'
+        >
+            <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                d='M16 9C16.5 9.5 17 10.5 17 12C17 13.5 16.5 14.5 16 15M19 6C20.5 7.5 21 10 21 12C21 14 20.5 16.5 19 18M13 3L7 8H5C3.89543 8 3 8.89543 3 10V14C3 15.1046 3.89543 16 5 16H7L13 21V3Z'
             />
         </svg>
     );

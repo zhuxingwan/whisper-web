@@ -50,7 +50,7 @@ export default function Transcript({ transcribedData }: Props) {
 
             if (diff <= 64) {
                 // We're close enough to the bottom, so scroll to the bottom
-                divRef.current.scrollTop = divRef.current.scrollHeight;
+                // divRef.current.scrollTop = divRef.current.scrollHeight;
             }
         }
     });

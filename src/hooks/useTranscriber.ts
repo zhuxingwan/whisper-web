@@ -1,3 +1,4 @@
+declare const window: any;
 import { useCallback, useMemo, useState } from "react";
 import { useWorker } from "./useWorker";
 import Constants from "../utils/Constants";
@@ -57,11 +58,12 @@ export function useTranscriber(): Transcriber {
     );
     const [isBusy, setIsBusy] = useState(false);
     const [isModelLoading, setIsModelLoading] = useState(false);
-
+    window.SP_setIsBusy = setIsBusy;
     const [progressItems, setProgressItems] = useState<ProgressItem[]>([]);
 
     const webWorker = useWorker((event) => {
         const message = event.data;
+        window.SP_event(webWorker, message);
         // Update the state with the result
         switch (message.status) {
             case "progress":
